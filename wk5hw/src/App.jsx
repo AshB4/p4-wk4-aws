@@ -10,8 +10,8 @@ const ENTITY_CONFIG = {
     endpoint: '/drivers',
     emptyMessage: 'No drivers found. Add the first driver to get started.',
     fields: [
-      { name: 'name', label: 'Name', placeholder: 'Jordan Ramirez' },
-      { name: 'licenseType', label: 'License Type', placeholder: 'Class A' },
+      { name: 'name', label: 'Name', placeholder: 'Rick Sanchez', type: 'text' },
+      { name: 'licenseType', label: 'License Type', placeholder: 'Class A', type: 'text' },
     ],
     columns: [
       { key: 'name', label: 'Name' },
@@ -24,12 +24,46 @@ const ENTITY_CONFIG = {
     endpoint: '/vehicles',
     emptyMessage: 'No vehicles found. Add the first vehicle to get started.',
     fields: [
-      { name: 'licensePlate', label: 'License Plate', placeholder: 'TX-4821' },
-      { name: 'model', label: 'Model', placeholder: 'Ford Transit 250' },
+      { name: 'licensePlate', label: 'License Plate', placeholder: 'MEE-6', type: 'text' },
+      { name: 'model', label: 'Model', placeholder: 'Portal Van', type: 'text' },
     ],
     columns: [
       { key: 'licensePlate', label: 'License Plate' },
       { key: 'model', label: 'Model' },
+    ],
+  },
+  routes: {
+    title: 'Delivery Routes',
+    subtitle: 'Manage service zones and delivery dates for each route record.',
+    endpoint: '/routes',
+    emptyMessage: 'No routes found. Create a route before assigning packages.',
+    fields: [
+      { name: 'serviceZone', label: 'Service Zone', placeholder: 'Citadel Sector 7', type: 'text' },
+      { name: 'date', label: 'Date', placeholder: '', type: 'date' },
+      { name: 'driverId', label: 'Driver ID', placeholder: '', type: 'select', options: 'drivers' },
+    ],
+    columns: [
+      { key: 'id', label: 'Route ID' },
+      { key: 'serviceZone', label: 'Service Zone' },
+      { key: 'date', label: 'Date' },
+      { key: 'driverId', label: 'Driver ID' },
+    ],
+  },
+  packages: {
+    title: 'Package Management',
+    subtitle: 'Assign packages to existing routes through a required Route ID link.',
+    endpoint: '/packages',
+    emptyMessage: 'No packages found. Create a package and link it to a route.',
+    fields: [
+      { name: 'description', label: 'Description', placeholder: 'Plumbus parts crate', type: 'text' },
+      { name: 'weight', label: 'Weight', placeholder: '4.5', type: 'number', min: '0.1', step: '0.1' },
+      { name: 'routeId', label: 'Route ID', placeholder: '', type: 'select', options: 'routes' },
+    ],
+    columns: [
+      { key: 'id', label: 'Package ID' },
+      { key: 'description', label: 'Description' },
+      { key: 'weight', label: 'Weight' },
+      { key: 'routeId', label: 'Route ID' },
     ],
   },
 }
@@ -37,47 +71,54 @@ const ENTITY_CONFIG = {
 const initialForms = {
   drivers: { name: '', licenseType: '' },
   vehicles: { licensePlate: '', model: '' },
+  routes: { serviceZone: '', date: '', driverId: '' },
+  packages: { description: '', weight: '', routeId: '' },
 }
 
 function normalizeCollection(data) {
-  if (Array.isArray(data)) {
-    return data
-  }
-
-  if (Array.isArray(data?.items)) {
-    return data.items
-  }
-
-  if (Array.isArray(data?.data)) {
-    return data.data
-  }
-
-  if (Array.isArray(data?.results)) {
-    return data.results
-  }
-
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data?.items)) return data.items
+  if (Array.isArray(data?.data)) return data.data
+  if (Array.isArray(data?.results)) return data.results
   return []
 }
 
 function normalizeEntity(type, entity) {
-  if (type === 'drivers') {
-    return {
-      id: entity.id ?? entity.driver_id ?? entity.driverId,
-      name: entity.name ?? entity.driver_name ?? '',
-      licenseType: entity.license_type ?? entity.licenseType ?? '',
-    }
-  }
-
-  return {
-    id: entity.id ?? entity.vehicle_id ?? entity.vehicleId,
-    licensePlate: entity.license_plate ?? entity.licensePlate ?? '',
-    model: entity.model ?? '',
+  switch (type) {
+    case 'drivers':
+      return {
+        id: entity.id ?? entity.driver_id ?? entity.driverId,
+        name: entity.name ?? entity.driver_name ?? '',
+        licenseType: entity.license_type ?? entity.licenseType ?? '',
+      }
+    case 'vehicles':
+      return {
+        id: entity.id ?? entity.vehicle_id ?? entity.vehicleId,
+        licensePlate: entity.license_plate ?? entity.licensePlate ?? '',
+        model: entity.model ?? '',
+      }
+    case 'routes':
+      return {
+        id: entity.id ?? entity.routes_id ?? entity.route_id ?? entity.routeId,
+        serviceZone: entity.service_zone ?? entity.serviceZone ?? '',
+        date: entity.date ?? '',
+        driverId: entity.driver_id?.toString?.() ?? entity.driverId?.toString?.() ?? '',
+      }
+    case 'packages':
+      return {
+        id: entity.id ?? entity.package_id ?? entity.packageId,
+        description: entity.description ?? '',
+        weight: entity.weight?.toString?.() ?? '',
+        routeId: entity.route_id?.toString?.() ?? entity.routeId?.toString?.() ?? '',
+      }
+    default:
+      return entity
   }
 }
 
 async function request(path, options = {}) {
   if (!API_BASE_URL) {
-    throw new Error('Set VITE_API_BASE_URL in a .env file to connect to the EC2 Flask API.')
+    throw new Error('Set VITE_API_BASE_URL in a .env file to connect to the Flask API.')
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -105,30 +146,86 @@ async function request(path, options = {}) {
 }
 
 function buildPayload(type, form) {
-  if (type === 'drivers') {
-    return {
-      name: form.name.trim(),
-      license_type: form.licenseType.trim(),
-    }
+  switch (type) {
+    case 'drivers':
+      return {
+        name: form.name.trim(),
+        license_type: form.licenseType.trim(),
+      }
+    case 'vehicles':
+      return {
+        license_plate: form.licensePlate.trim(),
+        model: form.model.trim(),
+      }
+    case 'routes':
+      return {
+        service_zone: form.serviceZone.trim(),
+        date: form.date,
+        driver_id: Number(form.driverId),
+      }
+    case 'packages':
+      return {
+        description: form.description.trim(),
+        weight: Number(form.weight),
+        route_id: Number(form.routeId),
+      }
+    default:
+      return {}
   }
+}
 
-  return {
-    license_plate: form.licensePlate.trim(),
-    model: form.model.trim(),
+function validateForm(type, form) {
+  switch (type) {
+    case 'drivers':
+      return form.name.trim() && form.licenseType.trim()
+    case 'vehicles':
+      return form.licensePlate.trim() && form.model.trim()
+    case 'routes':
+      return form.serviceZone.trim() && form.date && form.driverId
+    case 'packages':
+      return form.description.trim() && form.weight && Number(form.weight) > 0 && form.routeId
+    default:
+      return false
   }
 }
 
 function App() {
-  const [records, setRecords] = useState({ drivers: [], vehicles: [] })
+  const [records, setRecords] = useState({
+    drivers: [],
+    vehicles: [],
+    routes: [],
+    packages: [],
+  })
   const [forms, setForms] = useState(initialForms)
-  const [editingIds, setEditingIds] = useState({ drivers: null, vehicles: null })
+  const [editingIds, setEditingIds] = useState({
+    drivers: null,
+    vehicles: null,
+    routes: null,
+    packages: null,
+  })
   const [activePage, setActivePage] = useState('drivers')
-  const [loading, setLoading] = useState({ drivers: true, vehicles: true })
-  const [submitting, setSubmitting] = useState({ drivers: false, vehicles: false })
+  const [loading, setLoading] = useState({
+    drivers: true,
+    vehicles: true,
+    routes: true,
+    packages: true,
+  })
+  const [submitting, setSubmitting] = useState({
+    drivers: false,
+    vehicles: false,
+    routes: false,
+    packages: false,
+  })
   const [feedback, setFeedback] = useState({ kind: '', message: '' })
+  const [selectedRouteId, setSelectedRouteId] = useState('')
 
   useEffect(() => {
-    void Promise.all([loadRecords('drivers'), loadRecords('vehicles')])
+    void Promise.all([
+      loadRecords('drivers'),
+      loadRecords('vehicles'),
+      loadRecords('routes'),
+      loadRecords('packages'),
+    ])
   }, [])
 
   async function loadRecords(type) {
@@ -137,7 +234,6 @@ function App() {
     try {
       const payload = await request(ENTITY_CONFIG[type].endpoint)
       const normalized = normalizeCollection(payload).map((item) => normalizeEntity(type, item))
-
       setRecords((current) => ({ ...current, [type]: normalized }))
     } catch (error) {
       setFeedback({
@@ -170,20 +266,31 @@ function App() {
     setForms((current) => ({ ...current, [type]: { ...record } }))
   }
 
+  async function refreshLinkedData(type) {
+    await loadRecords(type)
+
+    if (type === 'routes') {
+      await loadRecords('packages')
+    }
+
+    if (type === 'packages') {
+      await loadRecords('routes')
+    }
+  }
+
   async function handleSubmit(type, event) {
     event.preventDefault()
 
-    const isEditing = Boolean(editingIds[type])
-    const payload = buildPayload(type, forms[type])
-
-    if (Object.values(payload).some((value) => !value)) {
+    if (!validateForm(type, forms[type])) {
       setFeedback({
         kind: 'error',
-        message: 'All form fields are required before submitting.',
+        message: 'All required fields must be filled in, and linked IDs cannot be left blank.',
       })
       return
     }
 
+    const isEditing = Boolean(editingIds[type])
+    const payload = buildPayload(type, forms[type])
     setSubmitting((current) => ({ ...current, [type]: true }))
 
     try {
@@ -201,7 +308,7 @@ function App() {
         message: `${isEditing ? 'Updated' : 'Created'} ${type.slice(0, -1)} successfully.`,
       })
       resetForm(type)
-      await loadRecords(type)
+      await refreshLinkedData(type)
     } catch (error) {
       setFeedback({
         kind: 'error',
@@ -229,7 +336,7 @@ function App() {
         resetForm(type)
       }
 
-      await loadRecords(type)
+      await refreshLinkedData(type)
     } catch (error) {
       setFeedback({
         kind: 'error',
@@ -240,16 +347,65 @@ function App() {
     }
   }
 
+  function renderField(type, field) {
+    if (field.type === 'select') {
+      const options = records[field.options]
+      const optionLabel =
+        field.options === 'drivers'
+          ? (item) => `#${item.id} - ${item.name}`
+          : (item) => `#${item.id} - ${item.serviceZone}`
+
+      return (
+        <label key={field.name}>
+          <span>{field.label}</span>
+          <select
+            value={forms[type][field.name]}
+            onChange={(event) => updateForm(type, field.name, event.target.value)}
+          >
+            <option value="">Select {field.label}</option>
+            {options.map((item) => (
+              <option key={item.id} value={item.id}>
+                {optionLabel(item)}
+              </option>
+            ))}
+          </select>
+        </label>
+      )
+    }
+
+    return (
+      <label key={field.name}>
+        <span>{field.label}</span>
+        <input
+          type={field.type}
+          min={field.min}
+          step={field.step}
+          value={forms[type][field.name]}
+          placeholder={field.placeholder}
+          onChange={(event) => updateForm(type, field.name, event.target.value)}
+        />
+      </label>
+    )
+  }
+
   const currentConfig = ENTITY_CONFIG[activePage]
+  const effectiveRouteId =
+    selectedRouteId && records.routes.some((route) => route.id?.toString() === selectedRouteId)
+      ? selectedRouteId
+      : records.routes[0]?.id?.toString?.() ?? ''
+  const selectedRoutePackages = records.packages.filter(
+    (item) => item.routeId?.toString() === effectiveRouteId,
+  )
+  const selectedRoute = records.routes.find((item) => item.id?.toString() === effectiveRouteId)
 
   return (
     <main className="app-shell">
       <section className="hero">
         <div>
-          <p className="eyebrow">Week 5 Day 1</p>
+          <p className="eyebrow">Week 5 Day 2</p>
           <h1>Fleet Management Console</h1>
           <p className="hero-copy">
-            Manage your primary ERD entities from one React interface connected to the live Flask API on EC2.
+            Manage drivers, vehicles, delivery routes, and packages with route-linked package tracking.
           </p>
         </div>
         <div className="api-card">
@@ -286,17 +442,7 @@ function App() {
           </div>
 
           <form className="entity-form" onSubmit={(event) => handleSubmit(activePage, event)}>
-            {currentConfig.fields.map((field) => (
-              <label key={field.name}>
-                <span>{field.label}</span>
-                <input
-                  type="text"
-                  value={forms[activePage][field.name]}
-                  placeholder={field.placeholder}
-                  onChange={(event) => updateForm(activePage, field.name, event.target.value)}
-                />
-              </label>
-            ))}
+            {currentConfig.fields.map((field) => renderField(activePage, field))}
 
             <div className="form-actions">
               <button type="submit" disabled={submitting[activePage]}>
@@ -313,7 +459,7 @@ function App() {
 
         <article className="panel">
           <div className="panel-heading">
-            <h2>{activePage === 'drivers' ? 'Current Drivers' : 'Current Vehicles'}</h2>
+            <h2>{currentConfig.title} List</h2>
             <p>Live data pulled from the REST API.</p>
           </div>
 
@@ -351,6 +497,82 @@ function App() {
                           Delete
                         </button>
                       </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </article>
+      </section>
+
+      <section className="details-grid">
+        <article className="panel">
+          <div className="panel-heading">
+            <h2>Route Details</h2>
+            <p>Select a route to see every package tied to that Route ID.</p>
+          </div>
+
+          {records.routes.length === 0 ? (
+            <p className="empty-state">Create a route before viewing route details.</p>
+          ) : (
+            <>
+              <label className="route-picker">
+                <span>Route ID</span>
+                <select value={effectiveRouteId} onChange={(event) => setSelectedRouteId(event.target.value)}>
+                  {records.routes.map((route) => (
+                    <option key={route.id} value={route.id}>
+                      #{route.id} - {route.serviceZone}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {selectedRoute ? (
+                <div className="route-summary">
+                  <p>
+                    <strong>Service Zone:</strong> {selectedRoute.serviceZone}
+                  </p>
+                  <p>
+                    <strong>Date:</strong> {selectedRoute.date}
+                  </p>
+                  <p>
+                    <strong>Driver ID:</strong> {selectedRoute.driverId}
+                  </p>
+                </div>
+              ) : null}
+            </>
+          )}
+        </article>
+
+        <article className="panel">
+          <div className="panel-heading">
+            <h2>Packages On Selected Route</h2>
+            <p>Filtered package records for the chosen Route ID.</p>
+          </div>
+
+          {effectiveRouteId === '' ? (
+            <p className="empty-state">Select a route to inspect its package list.</p>
+          ) : selectedRoutePackages.length === 0 ? (
+            <p className="empty-state">No packages are assigned to this route yet.</p>
+          ) : (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Package ID</th>
+                    <th>Description</th>
+                    <th>Weight</th>
+                    <th>Route ID</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedRoutePackages.map((pkg) => (
+                    <tr key={pkg.id}>
+                      <td>{pkg.id}</td>
+                      <td>{pkg.description}</td>
+                      <td>{pkg.weight}</td>
+                      <td>{pkg.routeId}</td>
                     </tr>
                   ))}
                 </tbody>
