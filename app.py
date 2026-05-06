@@ -1,7 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from database import get_db, init_db
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static", template_folder="templates")
 
 
 @app.after_request
@@ -14,7 +14,7 @@ def add_cors_headers(response):
 
 @app.route("/")
 def home():
-    return "Flask is working, w00t!"
+    return render_template("index.html")
 
 
 @app.route("/drivers", methods=["OPTIONS"])

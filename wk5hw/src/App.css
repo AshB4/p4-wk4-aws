@@ -13,9 +13,9 @@
   border: 1px solid var(--border);
   border-radius: 28px;
   background:
-    radial-gradient(circle at top left, rgba(255, 191, 105, 0.28), transparent 32%),
-    radial-gradient(circle at right, rgba(15, 76, 129, 0.2), transparent 30%),
-    linear-gradient(135deg, rgba(255, 248, 239, 0.92), rgba(242, 247, 255, 0.94));
+    radial-gradient(circle at top left, rgba(141, 255, 63, 0.26), transparent 28%),
+    radial-gradient(circle at 82% 22%, rgba(0, 216, 201, 0.22), transparent 22%),
+    linear-gradient(135deg, rgba(5, 16, 28, 0.96), rgba(10, 30, 46, 0.94));
   box-shadow: var(--shadow);
 }
 
@@ -44,16 +44,18 @@
   align-items: center;
   padding: 16px 18px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(6, 20, 34, 0.82);
+  border: 1px solid rgba(141, 255, 63, 0.24);
 }
 
 .status-dot {
   width: 14px;
   height: 14px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #1f9d55, #8ddf72);
-  box-shadow: 0 0 0 6px rgba(31, 157, 85, 0.12);
+  background: linear-gradient(135deg, #8dff3f, #00d8c9);
+  box-shadow:
+    0 0 0 6px rgba(141, 255, 63, 0.14),
+    0 0 18px rgba(141, 255, 63, 0.55);
 }
 
 .api-label {
@@ -84,15 +86,16 @@
 .tab {
   padding: 12px 18px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(7, 22, 36, 0.8);
   color: var(--text-h);
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(141, 255, 63, 0.14);
   font: inherit;
 }
 
 .tab.active {
-  background: var(--accent);
-  color: #fff;
+  background: linear-gradient(135deg, #8dff3f, #6df7d7);
+  color: #062033;
+  box-shadow: 0 0 22px rgba(141, 255, 63, 0.28);
 }
 
 .feedback {
@@ -103,15 +106,15 @@
 }
 
 .feedback.success {
-  background: rgba(31, 157, 85, 0.12);
-  border-color: rgba(31, 157, 85, 0.24);
-  color: #14532d;
+  background: rgba(141, 255, 63, 0.12);
+  border-color: rgba(141, 255, 63, 0.26);
+  color: #c8ffac;
 }
 
 .feedback.error {
   background: rgba(220, 38, 38, 0.1);
   border-color: rgba(220, 38, 38, 0.2);
-  color: #7f1d1d;
+  color: #ffc9c9;
 }
 
 .management-grid {
@@ -124,7 +127,8 @@
   padding: 24px;
   border-radius: 28px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.82);
+  background:
+    linear-gradient(180deg, rgba(7, 22, 36, 0.94), rgba(9, 28, 44, 0.92));
   box-shadow: var(--shadow);
   backdrop-filter: blur(12px);
 }
@@ -155,19 +159,19 @@
 .entity-form input,
 .entity-form select,
 .route-picker select {
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(141, 255, 63, 0.16);
   border-radius: 16px;
   padding: 14px 16px;
   font: inherit;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(4, 15, 26, 0.92);
   color: var(--text-h);
 }
 
 .entity-form input:focus,
 .entity-form select:focus,
 .route-picker select:focus {
-  outline: 2px solid rgba(15, 76, 129, 0.24);
-  border-color: rgba(15, 76, 129, 0.4);
+  outline: 2px solid rgba(141, 255, 63, 0.2);
+  border-color: rgba(0, 216, 201, 0.44);
 }
 
 .form-actions,
@@ -185,17 +189,18 @@
 
 .form-actions button,
 .actions button.danger {
-  background: var(--accent);
-  color: #fff;
+  background: linear-gradient(135deg, #8dff3f, #6df7d7);
+  color: #062033;
 }
 
 .secondary {
-  background: rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.07);
   color: var(--text-h);
 }
 
 .danger {
-  background: #b42318;
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  color: #fff;
 }
 
 .table-wrap {
@@ -211,7 +216,7 @@ th,
 td {
   padding: 14px 12px;
   text-align: left;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  border-bottom: 1px solid rgba(141, 255, 63, 0.1);
 }
 
 th {
@@ -222,7 +227,7 @@ th {
 .empty-state {
   padding: 18px;
   border-radius: 18px;
-  background: rgba(15, 23, 42, 0.04);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .details-grid {
@@ -248,7 +253,9 @@ th {
   gap: 10px;
   padding: 18px;
   border-radius: 18px;
-  background: rgba(15, 23, 42, 0.04);
+  background:
+    radial-gradient(circle at top right, rgba(141, 255, 63, 0.12), transparent 30%),
+    rgba(255, 255, 255, 0.04);
 }
 
 button:hover:not(:disabled) {

@@ -1,20 +1,21 @@
 :root {
-  --text: #475569;
-  --text-h: #132238;
-  --bg: #eef4f8;
-  --border: rgba(19, 34, 56, 0.12);
-  --accent: #0f4c81;
+  --text: #b8d7d9;
+  --text-h: #ecfff7;
+  --bg: #07131f;
+  --border: rgba(130, 255, 173, 0.18);
+  --accent: #8dff3f;
   --shadow:
-    0 24px 50px rgba(15, 23, 42, 0.08),
-    0 8px 18px rgba(15, 23, 42, 0.05);
+    0 24px 50px rgba(0, 0, 0, 0.34),
+    0 8px 18px rgba(0, 0, 0, 0.22);
   --sans: "Avenir Next", "Segoe UI", sans-serif;
   --heading: "Gill Sans", "Avenir Next", sans-serif;
 
   font: 17px/1.5 var(--sans);
   color: var(--text);
   background:
-    radial-gradient(circle at top, rgba(255, 191, 105, 0.18), transparent 22%),
-    linear-gradient(180deg, #f8fbfd 0%, #eef4f8 40%, #e6eef5 100%);
+    radial-gradient(circle at top, rgba(141, 255, 63, 0.2), transparent 18%),
+    radial-gradient(circle at 80% 20%, rgba(0, 216, 201, 0.14), transparent 20%),
+    linear-gradient(180deg, #07131f 0%, #091b2d 45%, #0d2337 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

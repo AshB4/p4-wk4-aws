@@ -117,11 +117,9 @@ function normalizeEntity(type, entity) {
 }
 
 async function request(path, options = {}) {
-  if (!API_BASE_URL) {
-    throw new Error('Set VITE_API_BASE_URL in a .env file to connect to the Flask API.')
-  }
+  const requestUrl = API_BASE_URL ? `${API_BASE_URL}${path}` : path
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(requestUrl, {
     headers: {
       'Content-Type': 'application/json',
       ...(options.headers || {}),
@@ -412,7 +410,7 @@ function App() {
           <span className="status-dot" />
           <div>
             <p className="api-label">API Base URL</p>
-            <code>{API_BASE_URL || 'Not configured'}</code>
+            <code>{API_BASE_URL || 'Same origin via Flask'}</code>
           </div>
         </div>
       </section>
